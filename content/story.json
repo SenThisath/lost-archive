@@ -1,44 +1,127 @@
 {
-  "age": 19,
-  "name": "Love",
-  "relationshipDate": "",
-  "relationshipDisplay": "OUR BEGINNING",
-  "childhood": [
-    {"id":"little","src":"","label":"The littlest you","year":"01"},
-    {"id":"growing","src":"","label":"Growing into yourself","year":"02"},
-    {"id":"teenager","src":"","label":"A whole world ahead","year":"03"},
-    {"id":"today","src":"","label":"You, right now","year":"04"}
-  ],
-  "sharedPhotos": [
-    {"id":"day-one","src":"","label":"The day I keep coming back to","year":"I"},
-    {"id":"day-two","src":"","label":"An ordinary, extraordinary moment","year":"II"},
-    {"id":"day-three","src":"","label":"My favourite part was you","year":"III"}
-  ],
-  "dateClues": [
-    {"title":"A message","text":"A few words. A little courage. Everything changed.","piece":"OUR"},
-    {"title":"A moment","text":"The world kept moving. For a second, ours stood still.","piece":"BEGIN"},
-    {"title":"A beginning","text":"The date only we need to remember.","piece":"NING"}
-  ],
-  "dayObjects": [
-    {"title":"The place","detail":"The place became a memory because you were there."},
-    {"title":"The little detail","detail":"Something tiny that somehow stayed with me."},
-    {"title":"The laughter","detail":"The part I wish I could replay."},
-    {"title":"The moment","detail":"Just us. Exactly where we were supposed to be."}
-  ],
-  "qualities": ["The way you care.","The little things you remember.","The way you feel everything deeply.","The way you try even when nobody notices.","The way you make ordinary days important."],
-  "feelings": ["I notice when you’re trying, even when you think I don’t.","I know you feel things more deeply than you sometimes show.","You make normal days mean more to me.","There are things about you I appreciate that I probably don’t say enough.","And sometimes I just look at you and feel lucky that somehow… it became us."],
-  "voiceTranscript": ["I don’t know what you wrote. Or what you said.","Or even if you chose not to say anything.","But I wanted you to have somewhere you could.","Because you’ve listened to everything I wanted to tell you tonight.","And there’s one last thing left."],
-  "voiceMessage": "",
-  "ambientTrack": "",
-  "birthdayTrack": "",
-  "finalLetter": [
-    "I could have just sent you a birthday message.",
-    "But there are too many versions of you, too many memories, and too many things I wanted you to feel again.",
-    "The little girl in those first pictures had no idea what her life would become. And the version of you reading this right now still has no idea what comes next.",
-    "I hope this next chapter gives you room to grow, reasons to laugh, and the kind of happiness that makes even an ordinary afternoon feel worth remembering.",
-    "You don’t have to have everything figured out at nineteen. I hope you keep becoming yourself, at your own pace. And I hope you know how glad I am that I get to know this version of you.",
-    "So no, the archive isn’t complete.",
-    "Because you’re still making it.",
-    "Happy birthday, love."
-  ]
+    "age": 19,
+    "name": "Videesha",
+    "relationshipDate": "2025-11-21",
+    "relationshipDisplay": "21 / 11 / 2025",
+    "childhood": [
+        {
+            "id": "little",
+            "src": "/little.jpg",
+            "label": "The littlest you",
+            "year": "01"
+        },
+        {
+            "id": "growing",
+            "src": "/growing.jpg",
+            "label": "Growing into yourself",
+            "year": "02"
+        },
+        {
+            "id": "teenager",
+            "src": "/teenager.jpg",
+            "label": "A whole world ahead",
+            "year": "03"
+        },
+        {
+            "id": "today",
+            "src": "/today.jpg",
+            "label": "You, right now",
+            "year": "04"
+        }
+    ],
+    "sharedPhotos": [
+        {
+            "id": "day-one",
+            "src": "/memo3.jpg",
+            "label": "The day I keep coming back to",
+            "year": "I"
+        },
+        {
+            "id": "day-two",
+            "src": "/memo4.png",
+            "label": "An ordinary, extraordinary moment",
+            "year": "II"
+        },
+        {
+            "id": "day-three",
+            "src": "/memo2.jpg",
+            "label": "My favourite part was you",
+            "year": "III"
+        },
+        {
+            "id": "day-three",
+            "src": "/memo1.jpg",
+            "label": "My favourite part was you",
+            "year": "IV"
+        }
+    ],
+    "dateClues": [
+        {
+            "title": "A message",
+            "text": "A few words. A little courage. Everything changed.",
+            "piece": "2025"
+        },
+        {
+            "title": "A moment",
+            "text": "The world kept moving. For a second, ours stood still.",
+            "piece": "11"
+        },
+        {
+            "title": "A beginning",
+            "text": "The date only we need to remember.",
+            "piece": "21"
+        }
+    ],
+    "dayObjects": [
+        {
+            "title": "The place",
+            "detail": "The place became a memory because you were there."
+        },
+        {
+            "title": "The little detail",
+            "detail": "Something tiny that somehow stayed with me."
+        },
+        {
+            "title": "The laughter",
+            "detail": "The part I wish I could replay."
+        },
+        {
+            "title": "The moment",
+            "detail": "Just us. Exactly where we were supposed to be."
+        }
+    ],
+    "qualities": [
+        "The way you care.",
+        "The little things you remember.",
+        "The way you feel everything deeply.",
+        "The way you try even when nobody notices.",
+        "The way you make ordinary days important."
+    ],
+    "feelings": [
+        "I notice when you’re trying, even when you think I don’t.",
+        "I know you feel things more deeply than you sometimes show.",
+        "You make normal days mean more to me.",
+        "There are things about you I appreciate that I probably don’t say enough.",
+        "And sometimes I just look at you and feel lucky that somehow… it became us."
+    ],
+    "voiceTranscript": [
+        "I don’t know what you wrote. Or what you said.",
+        "Or even if you chose not to say anything.",
+        "But I wanted you to have somewhere you could.",
+        "Because you’ve listened to everything I wanted to tell you tonight.",
+        "And there’s one last thing left."
+    ],
+    "voiceMessage": "",
+    "ambientTrack": "/api/media/music.mp3",
+    "birthdayTrack": "/api/media/bd.mp3",
+    "finalLetter": [
+        "I could have just sent you a birthday message.",
+        "But there are too many versions of you, too many memories, and too many things I wanted you to feel again.",
+        "The little girl in those first pictures had no idea what her life would become. And the version of you reading this right now still has no idea what comes next.",
+        "I hope this next chapter gives you room to grow, reasons to laugh, and the kind of happiness that makes even an ordinary afternoon feel worth remembering.",
+        "You don’t have to have everything figured out at nineteen. I hope you keep becoming yourself, at your own pace. And I hope you know how glad I am that I get to know this version of you.",
+        "So no, the archive isn’t complete.",
+        "Because you’re still making it.",
+        "Happy birthday, love."
+    ]
 }

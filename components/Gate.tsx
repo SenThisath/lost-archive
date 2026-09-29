@@ -89,8 +89,7 @@ export default function Gate({ initial }: { initial: State }) {
           ))}
         </div>
         <div className="release-date">
-          <span className="tiny-lock">◇</span> 01 OCTOBER 2026 <i /> 00:00 ·
-          ASIA / COLOMBO
+          <span className="tiny-lock">◇</span> 01 OCTOBER 2026 <i /> 00:00
         </div>
       </div>
       <footer className="sealed-footer">

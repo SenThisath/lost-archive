@@ -20,6 +20,12 @@ export default function Sequence({
   const done = useRef(onDone);
   done.current = onDone;
   const [paused, setPaused] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    const visibility = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", visibility);
+    return () => document.removeEventListener("visibilitychange", visibility);
+  }, []);
   const total =
     Math.max(lines.length, photos?.length ?? 0) + (quietEnd ? 1 : 0);
   useEffect(() => {
@@ -32,7 +38,7 @@ export default function Sequence({
       { opacity: 0, y: reduced ? 0 : 12 },
       { opacity: 1, y: 0, duration: reduced ? 0.1 : 1 },
     );
-    if (paused)
+    if (paused || hidden)
       return () => {
         tween.kill();
       };
@@ -44,7 +50,7 @@ export default function Sequence({
       clearTimeout(timeout);
       tween.kill();
     };
-  }, [index, total, lines, paused, reduced]);
+  }, [index, total, lines, paused, hidden, reduced]);
   const p = photos?.[Math.min(index, photos.length - 1)];
   return (
     <section

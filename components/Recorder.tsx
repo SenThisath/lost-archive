@@ -70,6 +70,20 @@ export default function Recorder({
     if (timeout.current) clearTimeout(timeout.current);
     cancelAnimationFrame(frame.current);
   };
+  // A phone lock, app switch, or interrupted touch must never leave recording on.
+  useEffect(() => {
+    const visibility = () => {
+      if (document.hidden) stop();
+    };
+    document.addEventListener("visibilitychange", visibility);
+    window.addEventListener("pagehide", stop);
+    window.addEventListener("blur", stop);
+    return () => {
+      document.removeEventListener("visibilitychange", visibility);
+      window.removeEventListener("pagehide", stop);
+      window.removeEventListener("blur", stop);
+    };
+  }, []);
   const start = () => {
     if (!stream.current || status !== "ready") return;
     try {
@@ -144,13 +158,15 @@ export default function Recorder({
       </p>
       {(status === "ready" || status === "recording") && (
         <button
-          className="primary"
+          className="primary record-hold"
+          onContextMenu={(e) => e.preventDefault()}
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId);
             start();
           }}
           onPointerUp={stop}
           onPointerCancel={stop}
+          onLostPointerCapture={stop}
           onKeyDown={(e) => {
             if ((e.key === " " || e.key === "Enter") && !e.repeat) {
               e.preventDefault();

@@ -24,10 +24,13 @@ export default function World({ state, story, onSelect, onReady }: Props) {
   ready.current = onReady;
   useEffect(() => {
     if (!host.current) return;
+    const compact =
+      matchMedia("(pointer: coarse)").matches ||
+      host.current.clientWidth <= 760;
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: true,
+        antialias: !compact,
         alpha: false,
         powerPreference: "high-performance",
       });
@@ -38,7 +41,7 @@ export default function World({ state, story, onSelect, onReady }: Props) {
     }
     const container = host.current;
     container.appendChild(renderer.domElement);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, compact ? 1.25 : 1.75));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -57,16 +60,47 @@ export default function World({ state, story, onSelect, onReady }: Props) {
       100,
     );
     camera.position.set(0, 2.4, 13);
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(
-      new THREE.Vector2(container.clientWidth, container.clientHeight),
-      0.55,
-      0.7,
-      0.8,
-    );
-    composer.addPass(bloom);
-    composer.addPass(new OutputPass());
+    // Phones use the same meshes, lighting and animations without four full-screen
+    // postprocessing passes. This avoids a high-DPR GPU/memory spike on mobile.
+    const composer = compact ? null : new EffectComposer(renderer);
+    if (composer) {
+      composer.addPass(new RenderPass(scene, camera));
+      composer.addPass(
+        new UnrealBloomPass(
+          new THREE.Vector2(container.clientWidth, container.clientHeight),
+          0.55,
+          0.7,
+          0.8,
+        ),
+      );
+      composer.addPass(new OutputPass());
+    }
+    let cameraHomeZ = 13;
+    function framing() {
+      const aspect = Math.max(
+        0.25,
+        container.clientWidth / Math.max(container.clientHeight, 1),
+      );
+      const portrait = aspect < 1;
+      camera.aspect = aspect;
+      camera.fov = portrait ? 60 : 49;
+      camera.updateProjectionMatrix();
+      const sceneName = stateRef.current.scene;
+      const base = sceneName === "hub" ? 13 : sceneName === "final" ? 12 : 10;
+      const halfWidth =
+        sceneName === "hub" ? 7.6 : sceneName === "final" ? 6.5 : 4.8;
+      return portrait
+        ? Math.max(
+            base,
+            Math.min(
+              34,
+              halfWidth /
+                (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * aspect) -
+                3,
+            ),
+          )
+        : base;
+    }
     const group = new THREE.Group();
     scene.add(group);
     const ambient = new THREE.HemisphereLight("#9abfe9", "#171019", 1.15);
@@ -352,7 +386,7 @@ export default function World({ state, story, onSelect, onReady }: Props) {
     }
     const particleGeo = new THREE.BufferGeometry();
     geometries.add(particleGeo);
-    const points = new Float32Array(750 * 3);
+    const points = new Float32Array((compact ? 320 : 750) * 3);
     for (let i = 0; i < points.length; i += 3) {
       points[i] = (Math.random() - 0.5) * 36;
       points[i + 1] = Math.random() * 13;
@@ -421,6 +455,8 @@ export default function World({ state, story, onSelect, onReady }: Props) {
       if (!isFinal) {
         for (let i = 0; i < 16; i++) {
           const a = (i * Math.PI) / 8;
+          // The portrait camera sits farther back: keep its sightline open.
+          if (Math.cos(a) > 0.5) continue;
           const pillar = mesh(
             new THREE.CylinderGeometry(0.16, 0.24, 11, 8),
             stone,
@@ -500,32 +536,32 @@ export default function World({ state, story, onSelect, onReady }: Props) {
         box(1.6, 0.035, 0.02, 0, 1.05, 0, gold, empty);
         box(1.6, 0.035, 0.02, 0, -1.05, 0, gold, empty);
       }
-      if (s.scene === "date") {
-        textPlane(
-          "?? / ?? / ????",
-          "A DAY THE ARCHIVE COULD NOT FORGET",
-          0,
-          3.2,
-          -4,
-          7,
-        );
-        [-3, 0, 3].forEach((x, i) => orb(x, 1.7, -1, "clue-" + i, i));
-        for (let i = 0; i < 18; i++) {
-          const a = i * 2.4;
-          const r = 4 + (i % 3);
-          const sheet = box(
-            0.4,
-            0.55,
-            0.012,
-            Math.sin(a) * r,
-            2 + (i % 5) * 0.7,
-            Math.cos(a) * r - 3,
-            gold,
-          );
-          sheet.rotation.set(0.15, a, 0.2);
-          float(sheet);
-        }
-      }
+      // if (s.scene === "date") {
+      //   textPlane(
+      //     "?? / ?? / ????",
+      //     "A DAY THE ARCHIVE COULD NOT FORGET",
+      //     0,
+      //     3.2,
+      //     -4,
+      //     7,
+      //   );
+      //   [-3, 0, 3].forEach((x, i) => orb(x, 1.7, -1, "clue-" + i, i));
+      //   for (let i = 0; i < 18; i++) {
+      //     const a = i * 2.4;
+      //     const r = 4 + (i % 3);
+      //     const sheet = box(
+      //       0.4,
+      //       0.55,
+      //       0.012,
+      //       Math.sin(a) * r,
+      //       2 + (i % 5) * 0.7,
+      //       Math.cos(a) * r - 3,
+      //       gold,
+      //     );
+      //     sheet.rotation.set(0.15, a, 0.2);
+      //     float(sheet);
+      //   }
+      // }
       if (s.scene === "darkroom") {
         const light = new THREE.PointLight("#c75043", 30, 16, 2);
         light.position.set(0, 4, 0);
@@ -670,7 +706,7 @@ export default function World({ state, story, onSelect, onReady }: Props) {
             1 + Math.random() * 6,
             Math.cos(a) * r,
           );
-          group.add(point);
+          if (i < (compact ? 3 : 8)) group.add(point);
           const star = mesh(new THREE.SphereGeometry(0.035, 6, 6), amber);
           star.position.copy(point.position);
         }
@@ -681,6 +717,8 @@ export default function World({ state, story, onSelect, onReady }: Props) {
           : isFinal
             ? { x: 0, y: 3.3, z: 12 }
             : { x: 0, y: 2.8, z: 10 };
+      cameraHomeZ = framing();
+      destination.z = cameraHomeZ;
       camera.position.set(destination.x, destination.y, destination.z + 2);
       tweens.push(
         gsap.to(camera.position, {
@@ -702,17 +740,50 @@ export default function World({ state, story, onSelect, onReady }: Props) {
       drag = false,
       lastX = 0,
       yaw = 0;
-    function hover(e: PointerEvent) {
+    const pointers = new Map<number, { x: number; y: number }>();
+    let moved = false,
+      pinched = false,
+      pinchDistance = 0;
+    function distance() {
+      const [a, b] = Array.from(pointers.values());
+      return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+    }
+    function coordinates(e: PointerEvent) {
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.set(
         ((e.clientX - rect.left) / rect.width) * 2 - 1,
-        (-(e.clientY - rect.top) / rect.height) * 2 + 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1,
       );
-      look.set(pointer.x, pointer.y);
-      if (drag) {
-        yaw += (e.clientX - lastX) * 0.002;
-        lastX = e.clientX;
+    }
+    function hover(e: PointerEvent) {
+      coordinates(e);
+      if (pointers.has(e.pointerId))
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pointers.size > 1) {
+        const next = distance();
+        if (pinchDistance > 0)
+          camera.position.z = THREE.MathUtils.clamp(
+            (camera.position.z * pinchDistance) / Math.max(1, next),
+            4,
+            Math.max(34, cameraHomeZ + 6),
+          );
+        pinchDistance = next;
+        pinched = true;
+        moved = true;
+        return;
       }
+      if (e.pointerType === "mouse") look.set(pointer.x, pointer.y);
+      if (drag && pointers.has(e.pointerId)) {
+        yaw = THREE.MathUtils.clamp(
+          yaw + (e.clientX - lastX) * 0.004,
+          -1.3,
+          1.3,
+        );
+        lastX = e.clientX;
+        if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8)
+          moved = true;
+      }
+      if (e.pointerType !== "mouse") return;
       ray.setFromCamera(pointer, camera);
       renderer.domElement.style.cursor = ray.intersectObjects(interactive, true)
         .length
@@ -722,10 +793,15 @@ export default function World({ state, story, onSelect, onReady }: Props) {
           : "grab";
     }
     function click(e: PointerEvent) {
-      if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) return;
-      hover(e);
+      if (moved || pinched) return;
+      coordinates(e);
       ray.setFromCamera(pointer, camera);
-      const hit = ray.intersectObjects(interactive, true)[0];
+      // Invisible photo groups must not consume taps before the projector starts.
+      const hit = ray.intersectObjects(interactive, true).find(({ object }) => {
+        for (let o: THREE.Object3D | null = object; o; o = o.parent)
+          if (!o.visible) return false;
+        return true;
+      });
       if (hit) {
         let o: THREE.Object3D | null = hit.object;
         while (o && !o.userData.action) o = o.parent;
@@ -733,13 +809,38 @@ export default function World({ state, story, onSelect, onReady }: Props) {
       }
     }
     const pd = (e: PointerEvent) => {
-      down = { x: e.clientX, y: e.clientY };
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (!pointers.size) {
+        down = { x: e.clientX, y: e.clientY };
+        moved = false;
+        pinched = false;
+      }
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      renderer.domElement.setPointerCapture(e.pointerId);
       lastX = e.clientX;
       drag = true;
+      if (pointers.size > 1) {
+        pinched = true;
+        pinchDistance = distance();
+      }
     };
     const pu = (e: PointerEvent) => {
-      drag = false;
-      click(e);
+      if (!pointers.has(e.pointerId)) return;
+      pointers.delete(e.pointerId);
+      if (!pointers.size) {
+        drag = false;
+        click(e);
+      } else lastX = Array.from(pointers.values())[0].x;
+      if (renderer.domElement.hasPointerCapture(e.pointerId))
+        renderer.domElement.releasePointerCapture(e.pointerId);
+    };
+    const cancel = (e: PointerEvent) => {
+      pointers.delete(e.pointerId);
+      moved = true;
+      if (!pointers.size) {
+        drag = false;
+        pinchDistance = 0;
+      }
     };
     const kd = (e: KeyboardEvent) => {
       if (
@@ -753,16 +854,22 @@ export default function World({ state, story, onSelect, onReady }: Props) {
     renderer.domElement.addEventListener("pointermove", hover);
     renderer.domElement.addEventListener("pointerdown", pd);
     renderer.domElement.addEventListener("pointerup", pu);
+    renderer.domElement.addEventListener("pointercancel", cancel);
+    renderer.domElement.addEventListener("lostpointercapture", cancel);
     window.addEventListener("keydown", kd);
     window.addEventListener("keyup", ku);
     const resize = () => {
       const w = container.clientWidth,
         h = container.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
+      if (!w || !h) return;
+      const previousHome = cameraHomeZ;
+      cameraHomeZ = framing();
+      camera.position.z += cameraHomeZ - previousHome;
       renderer.setSize(w, h);
-      composer.setSize(w, h);
+      composer?.setSize(w, h);
     };
+    const sizeObserver = new ResizeObserver(resize);
+    sizeObserver.observe(container);
     window.addEventListener("resize", resize);
     const contextLost = (e: Event) => {
       e.preventDefault();
@@ -776,6 +883,8 @@ export default function World({ state, story, onSelect, onReady }: Props) {
     const visibilityChange = () => {
       visibility = !document.hidden;
       keys.clear();
+      pointers.clear();
+      drag = false;
     };
     document.addEventListener("visibilitychange", visibilityChange);
     function animate() {
@@ -883,7 +992,10 @@ export default function World({ state, story, onSelect, onReady }: Props) {
       if (keys.has("w") || keys.has("arrowup"))
         camera.position.z = Math.max(4, camera.position.z - speed);
       if (keys.has("s") || keys.has("arrowdown"))
-        camera.position.z = Math.min(17, camera.position.z + speed);
+        camera.position.z = Math.min(
+          Math.max(17, cameraHomeZ + 6),
+          camera.position.z + speed,
+        );
       if (keys.has("a") || keys.has("arrowleft"))
         camera.position.x = Math.max(-7, camera.position.x - speed);
       if (keys.has("d") || keys.has("arrowright"))
@@ -894,7 +1006,8 @@ export default function World({ state, story, onSelect, onReady }: Props) {
         -3,
       );
       camera.lookAt(targetLook);
-      composer.render();
+      if (composer) composer.render();
+      else renderer.render(scene, camera);
     }
     animate();
     ready.current();
@@ -903,18 +1016,21 @@ export default function World({ state, story, onSelect, onReady }: Props) {
       cancelAnimationFrame(request);
       tweens.forEach((t) => t.kill());
       document.removeEventListener("visibilitychange", visibilityChange);
+      sizeObserver.disconnect();
       window.removeEventListener("resize", resize);
       window.removeEventListener("keydown", kd);
       window.removeEventListener("keyup", ku);
       renderer.domElement.removeEventListener("pointermove", hover);
       renderer.domElement.removeEventListener("pointerdown", pd);
       renderer.domElement.removeEventListener("pointerup", pu);
+      renderer.domElement.removeEventListener("pointercancel", cancel);
+      renderer.domElement.removeEventListener("lostpointercapture", cancel);
       renderer.domElement.removeEventListener("webglcontextlost", contextLost);
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
       textureCache.forEach((t) => t.dispose());
       videoTexture?.dispose();
-      composer.dispose();
+      composer?.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     };
